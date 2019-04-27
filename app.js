@@ -1,42 +1,48 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const express = require("express")
+const path = require("path")
+const cookieParser = require("cookie-parser")
+const logger = require("morgan")
 
-const songsRouter = require('./routes/songs');
-const configLoader = require(path.join(__dirname, 'config', 'config-loader'))
-const envUtils = require(path.join(__dirname, 'envUtils'))
+const configLoader = require("./utils/config-loader")
+const envUtils = require("./utils/env-utils")
+const songsRouter = require("./songs/routes")
+const initAppServices = require("./app-services")
+const { ApiRequestError } = require("./utils/error-types")
 
-const app = express();
+const app = express()
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+const appConfig = configLoader.loadConfig(envUtils.getCurrentEnvironment())
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/static-songs', express.static(configLoader.loadConfig(envUtils.getCurrentEnvironment()).songsDir));
+initAppServices(app, appConfig)
 
-app.use('/songs', songsRouter);
+app.set("views", path.join(__dirname, "views"))
+app.set("view engine", "jade")
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+app.use(logger("dev"))
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(cookieParser())
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === envUtils.Environments.DEVELOPMENT ? err : {};
+app.use("/static-songs", express.static(appConfig.songsDir))
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+app.use("/api/songs", songsRouter)
 
-module.exports = app;
+app.use((req, res) => {
+  res.status(404)
+  res.render("error", { message: "Not Found" })
+})
+
+app.use((err, req, res, next) => {
+  console.error(err)
+  if (err instanceof ApiRequestError) {
+    res.render("error", { message: err })
+  } else {
+    res.status(err.status || 500)
+    res.render("error", {
+      message:
+        "We're sorry, something went wrong. Our best engineers are looking into this :)"
+    })
+  }
+})
+
+module.exports = app
