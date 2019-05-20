@@ -1,15 +1,24 @@
+const ObjectID = require('mongodb').ObjectID;
+
 const SONGS_COLLECTION_NAME = 'songs'
 
-const PAGE_SIZE = 5
 
 const songQueries = db => ({
-  allPaged: page =>
+  allPaged: (page, pageSize) =>
     db
       .collection(SONGS_COLLECTION_NAME)
       .find()
-      .skip(page * PAGE_SIZE)
-      .limit(PAGE_SIZE)
-      .toArray()
+      .skip(page * pageSize)
+      .limit(pageSize)
+      .toArray(),
+  one: id =>
+    db
+      .collection(SONGS_COLLECTION_NAME)
+      .findOne({_id: ObjectID(id)}),
+  count: () =>
+    db
+      .collection(SONGS_COLLECTION_NAME)
+      .count()
 })
 
 module.exports = songQueries

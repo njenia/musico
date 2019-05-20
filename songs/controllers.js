@@ -1,18 +1,36 @@
+const { SONGS_STATIC_URL } = require("../utils/constants")
+
 const pageNotValidError = {
   status: 400,
   body: "page parameter must be a non negative integer"
 }
 
+const PAGE_SIZE = 5
+
 const all = async ({
   appServices: { songQueries },
   queryParams: { page },
   parsedPage = parseInt(page || 0)
-}) =>
-  isNaN(parsedPage) || parsedPage < 0
+}) => {
+  const songsCount = await songQueries.count()
+  const songs = (await songQueries.allPaged(parsedPage, PAGE_SIZE)).map(adaptedSong)
+  return isNaN(parsedPage) || parsedPage < 0
     ? pageNotValidError
     : {
-        body: (await songQueries.allPaged(parsedPage)).map(adaptedSong)
+        body: {
+          count: songsCount,
+          maxPage: Math.ceil(songsCount / PAGE_SIZE) - 1,
+          songs: songs
+        }
       }
+}
+
+const one = async ({
+  appServices: { songQueries },
+  params: { id }
+}) => ({
+  body: adaptedSong(await songQueries.one(id))
+})
 
 const adaptedSong = ({
   _id,
@@ -23,9 +41,9 @@ const adaptedSong = ({
   id: _id,
   title,
   artist,
-  songFilename
+  url: `${SONGS_STATIC_URL}/${songFilename}`
 })
 
 module.exports = {
-  all
+  all, one
 }

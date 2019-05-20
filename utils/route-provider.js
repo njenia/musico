@@ -5,7 +5,8 @@ const routeProvider = routeHandlerFn => async (req, res, next) => {
     appServices: {
       songQueries: res.app.locals.songQueries
     },
-    queryParams: req.query
+    queryParams: req.query,
+    params: req.params
   }
   try{
     const {status = 200, body = {}} = await routeHandlerFn(routeHandlerParams)

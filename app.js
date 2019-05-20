@@ -8,6 +8,7 @@ const envUtils = require("./utils/env-utils")
 const songsRouter = require("./songs/routes")
 const initAppServices = require("./app-services")
 const { ApiRequestError } = require("./utils/error-types")
+const { SONGS_STATIC_URL } = require("./utils/constants")
 
 const app = express()
 
@@ -23,7 +24,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 
-app.use("/static-songs", express.static(appConfig.songsDir))
+app.use(SONGS_STATIC_URL, express.static(appConfig.songsDir))
 
 app.use("/api/songs", songsRouter)
 
