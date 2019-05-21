@@ -9,6 +9,7 @@ const songsRouter = require("./songs/routes")
 const initAppServices = require("./app-services")
 const { ApiRequestError } = require("./utils/error-types")
 const { SONGS_STATIC_URL } = require("./utils/constants")
+require('./listening-realtime/websocket')
 
 const app = express()
 

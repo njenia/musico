@@ -3,6 +3,7 @@ Musico is a very simple music player, some would say too simple, but simplicity 
 
 ## Tech
 This project is built on express.js and uses mongodb to store data.
+It also uses redis for cache and pubsub. 
 
 ## How to use
 Create a DB in mongodb. Call it `musico` (the name is actually configurable so you can choose otherwise). 

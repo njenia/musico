@@ -32,6 +32,18 @@ const one = async ({
   body: adaptedSong(await songQueries.one(id))
 })
 
+const stats = async ({
+  appServices: { songQueries }
+}) => {
+  const songsCount = await songQueries.count()
+  return {
+    body: {
+      count: songsCount,
+      maxPage: Math.ceil(songsCount / PAGE_SIZE) - 1
+    }
+  }
+}
+
 const adaptedSong = ({
   _id,
   title,
@@ -45,5 +57,5 @@ const adaptedSong = ({
 })
 
 module.exports = {
-  all, one
+  all, one, stats
 }
